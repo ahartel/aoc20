@@ -6,12 +6,14 @@
 ;; that value in the collection that sums to 2020 with the input
 
 (defn matcher-finder
- [value numbers]
+ [target value numbers]
+;; (println " Target:" target "Value:" value "Numbers:" numbers)
  (loop [remaining-numbers numbers]
   (if (empty? remaining-numbers)
+;;   (do (println "Returning nil") nil)
    nil
    (let [[first & remaining] remaining-numbers]
-    (if (= 2020 (+ value first))
+     (if (= target (+ value first))
      first
      (recur remaining))))))
 
@@ -20,22 +22,36 @@
 (defn split [raw_data] (clojure.string/split raw_data #"\n"))
 (defn intify [list](map #(Integer. %) list))
 (def data (intify (split raw_data)))
-(def dummy_data '(5 1010 5 1010))
+(def dummy_data '(5 1010 5 1010 1 1009))
 
 (defn find_and_mult_partner
     ""
-    [numbers]
+    [target numbers]
+;    (println "Target:" target "Numbers:" numbers)
     (loop [remaining-numbers numbers]
      (let [[first & remaining] remaining-numbers]
-      (let [match (matcher-finder first remaining)]
-       (if (and (some? match) (= 2020 (+ first match)))
-        (println (* first match))
+      (let [match (matcher-finder target first remaining)]
+;       (println "Got" match "remaining" remaining)
+       (if (or (nil? remaining) (and (some? match) (= target (+ first match))))
+        (list first match)
         (recur remaining))))))
+
+(defn find_and_mult_triple
+ ""
+ [target numbers]
+ (loop [remaining-numbers numbers]
+  (let [[first & remaining] remaining-numbers]
+   (let [others (find_and_mult_partner (- target first) remaining)]
+;    (println "Got" others)
+    (if (and (every? some? others) (= target (reduce + first others)))
+     (concat [first] others)
+     (recur remaining))))))
+    ;;(println others)))))
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-;;  (println dummy_data)
-  (find_and_mult_partner dummy_data)
-;;  (println data)
-  (find_and_mult_partner data))
+  (println (reduce * (find_and_mult_partner 2020 dummy_data)))
+  (println (reduce * (find_and_mult_partner 2020 data)))
+  (println (reduce * (find_and_mult_triple 2020 dummy_data)))
+  (println (reduce * (find_and_mult_triple 2020 data))))
