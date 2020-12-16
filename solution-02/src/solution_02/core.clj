@@ -40,7 +40,23 @@
                  (map vector data-keys unmapped-row)))
        rows))
 
+(defn count-letter
+  [letter string]
+  (reduce + (map #(if (= (char (first (.getBytes letter))) %) 1 0) string)))
+
+(defn check-password
+  "Check if :letter appears between :min and :max times in :data"
+  [row]
+  (let [num-found (count-letter (:letter row) (:data row))]
+;;    (println row num-found)
+    (if (and (<= num-found (:max row)) (>= num-found (:min row)))
+      1
+      0)
+    ))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (mapify (parse (slurp filename))))
+  (let [mapped-data (mapify (parse (slurp filename)))]
+    (let [num-valid-passwords (reduce + (map check-password mapped-data))]
+      (println "There are" num-valid-passwords "passwords"))))
