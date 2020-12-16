@@ -40,9 +40,13 @@
                  (map vector data-keys unmapped-row)))
        rows))
 
+(defn letter-to-char
+  [letter]
+  (char (first (.getBytes letter))))
+
 (defn count-letter
   [letter string]
-  (reduce + (map #(if (= (char (first (.getBytes letter))) %) 1 0) string)))
+  (reduce + (map #(if (= (letter-to-char letter) %) 1 0) string)))
 
 (defn check-password
   "Check if :letter appears between :min and :max times in :data"
@@ -54,9 +58,20 @@
       0)
     ))
 
+(defn check-password-2
+  "Check if :letter is on exactly one position of :min or :max in :data"
+  [row]
+  (let [min-found (= (letter-to-char (:letter row)) (nth (:data row) (- (:min row) 1)))]
+    (let [max-found (= (letter-to-char (:letter row)) (nth (:data row) (- (:max row) 1)))]
+      (if (or (and min-found (not max-found)) (and (not min-found) max-found))
+        1
+        0))))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
   (let [mapped-data (mapify (parse (slurp filename)))]
     (let [num-valid-passwords (reduce + (map check-password mapped-data))]
-      (println "There are" num-valid-passwords "passwords"))))
+      (println "There are" num-valid-passwords "correct passwords"))
+    (let [num-valid-passwords (reduce + (map check-password-2 mapped-data))]
+      (println "There are" num-valid-passwords "correct passwords"))))
