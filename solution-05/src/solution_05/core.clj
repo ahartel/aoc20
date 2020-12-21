@@ -26,6 +26,19 @@
           (recur rest (+ total current-power) (/ current-power 2))
           (recur rest total (/ current-power 2)))))))
 
+(defn find-my-seat
+  [seats]
+  (let [sorted-seats (sort seats)
+;;        _ (println sorted-seats)
+        ]
+    (loop [[first-seat second-seat third-seat & rest] sorted-seats]
+;;      (println first-seat second-seat third-seat)
+      (if (and
+           (= (- second-seat first-seat) 1)
+           (= (- third-seat second-seat) 1)
+           (not (nil? rest)))
+        (recur (cons second-seat (cons third-seat rest)))
+        second-seat))))
 
 (defn values-of-row
   [row]
@@ -34,4 +47,6 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (apply max (map #(values-of-row (split-rows-cols %)) (split-into-rows (slurp filename)))))
+  (let [seat-ids (map #(values-of-row (split-rows-cols %)) (split-into-rows (slurp filename)))]
+    (println (apply max seat-ids))
+    (println (+ 1 (find-my-seat seat-ids)))))
